@@ -75,7 +75,16 @@ with Live(save_dvc_exp=True) as live:
 18) Now git add, commit, push
 
 
-
+Adding a remote S3 storage to DVC:
+19) Login to AWS console
+20) Create an IAM user
+21) Create S3 (enter unique name and create)
+22) pip install "dvc[s3]"
+23) pip install awscli
+24) "aws configure" - on terminal
+25) dvc remote add -d dvcstore s3://bucketname (Instead of dvcstore, you could have added some other name as well)
+26) dvc commit-push the exp outcome that you want to keep
+27) Finally git add, commit, push
 
 
 Logging crash course:
