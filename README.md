@@ -1,29 +1,112 @@
-# MLOPS_pipeline
+# 🧪 MLOps Pipeline using DVC & Git
 
-Building pipeline:
-1) Create a GitHub repo and clone it to local machine (Add experiments)
-2) Add src folder along with all components(run them invidually)
-3) Add data, models, reports directories to .gitignore file
-4) Now git add, commit, push
+This project is a structured MLOps pipeline template that integrates **Git**, **DVC**, **AWS S3**, **experimentation tracking**, and **parameterization**. The goal is to modularize ML workflows, track experiments, version datasets/models, and enable reproducibility and collaboration.
 
-Setting up dvc pipeline (without params)
-5) Create dvc.yaml file and add stages to it
-6) "dvc init" then do "dvc repro" to test the pipeline automation. (check dvc dag)
-7) Now git add, commit, push
+---
 
+## 🧱 Project Structure & Setup
 
-Setting up dvc pipeline (with params)
-8) add params.yaml file
-9) add the params setup
-----------------------------------------------------------------
-params.yaml setup
+### Step 1: Initialize Git Repository
 
-1. import yaml
-2. add the load_params function 
+```bash
+git init
+```
+
+- Create a GitHub repository and clone it locally.
+- This allows version control of your source code and infrastructure (e.g., `dvc.yaml`, scripts).
+- Commit an initial project structure with:
+
+```bash
+.
+├── src/              # All Python code and modular components
+├── data/             # Raw and processed data (ignored in Git)
+├── models/           # Trained models (ignored in Git)
+├── reports/          # Visualizations, evaluation metrics (ignored in Git)
+├── .gitignore        # Exclude bulky/untracked files from Git
+```
+
+- Add `data/`, `models/`, and `reports/` to your `.gitignore`.
+
+Then:
+```bash
+git add .
+git commit -m "Initial commit with pipeline structure"
+git push origin main
+```
+
+---
+
+## 📦 Set up DVC for pipeline automation
+
+### Step 2: Initialize DVC
+
+```bash
+dvc init
+```
+
+- This sets up `.dvc/` config directory and tracks data/model versioning.
+- Add your pipeline stages using `dvc.yaml`.
+
+### Step 3: Define Your Pipeline Stages
+
+Manually create a `dvc.yaml` file or use `dvc stage add`. Each stage might look like:
+
+```yaml
+stages:
+  data_ingestion:
+    cmd: python src/data_ingestion.py
+    deps:
+      - src/data_ingestion.py
+    outs:
+      - data/raw.csv
+```
+
+Repeat similarly for preprocessing, feature engineering, model training, etc.
+
+### Step 4: Run and Test Pipeline
+
+```bash
+dvc repro
+dvc dag  # Visualize your pipeline graphically
+```
+
+Then:
+
+```bash
+git add dvc.yaml dvc.lock
+git commit -m "Add DVC pipeline stages"
+git push
+```
+
+---
+
+## 📌 Parameterize the Pipeline with `params.yaml`
+
+To control parameters dynamically (e.g., train-test split, model hyperparameters):
+
+### Step 5: Add `params.yaml`
+
+```yaml
+train:
+  test_size: 0.2
+  random_state: 42
+model:
+  n_estimators: 100
+  max_depth: 10
+```
+
+### Step 6: Load Parameters in Code
+
+Create a helper function like:
+
+```python
+import yaml
+import logging
+
+logger = logging.getLogger(__name__)
 
 def load_params(param_path: str) -> dict:
-    """Load parameters from a YAML file"""
-    try: 
+    try:
         with open(param_path, "r") as f:
             params = yaml.safe_load(f)
         logger.debug("Parameters retrieved from %s", param_path)
@@ -31,76 +114,189 @@ def load_params(param_path: str) -> dict:
     except FileNotFoundError:
         logger.error("File not found: %s", param_path)
         raise
-    except yaml.YAMLError as e:
-        logger.error("YAML Error: %s", e)
-        raise
-    except Exception as e:
-        logger.error("Unexpected error: %s", e)
-        raise
+```
 
-3. Load the params in the main()
+Use `load_params("params.yaml")` inside your `main()` function or relevant script.
 
-----------------------------------------------------------------
-10) Do "dvc repro" again to test the pipeline along with the params
-11) Now git add, commit, push
+### Step 7: Re-run Pipeline with Parameters
 
+```bash
+dvc repro
+```
 
+Changes in `params.yaml` will now automatically trigger reruns only of affected stages.
 
-Experiments with DVC:
-12) pip install dvclive
-13) Add the dvclive code block
-----------------------------------------------------------------
+Then:
 
-dvclive code block:
+```bash
+git add .
+git commit -m "Add parameterized pipeline"
+git push
+```
 
-1) Import dvclive and yaml
+---
 
+## 📊 Run and Track Experiments with DVCLive
+
+### Step 8: Install DVCLive
+
+```bash
+pip install dvclive
+```
+
+### Step 9: Add Live Logging to Your Scripts
+
+In `model_training.py`:
+
+```python
 from dvclive import Live
-import yaml
 
-2) Add the load_params function and initiate "params" var in main()
-3) Add code below to main():
 with Live(save_dvc_exp=True) as live:
-    live.log_metric("accuracy", accuracy_score(y_test, y_pred))
-    live.log_metric("precision", precision_score(y_test, y_pred))
-    live.log_metric("recall", recall_score(y_test, y_pred))
-
+    live.log_metric("accuracy", acc)
+    live.log_metric("precision", prec)
+    live.log_metric("recall", rec)
     live.log_params(params)
+```
 
-----------------------------------------------------------------
-14) Do "dvc exp run", it will create a new dvc.yaml(if already not there) and dvclive directory(each run will be considered as an experiment)
-15) Do "dvc exp show" on terminal to see the experiments or use extension on VSCode(install dvc extension)
-16) Do "dvc exp remove {exp-name}" to remove exp(optional) | "dvc exp apply {exp-name}" to reproduce prev exp
-17) Change params, re-run code(produce new experiments)
-18) Now git add, commit, push
+This creates a `dvclive/` directory that tracks metrics over time.
+
+### Step 10: Run and View Experiments
+
+```bash
+dvc exp run
+dvc exp show  # View experiment results in CLI table
+```
+
+You can manage experiments using:
+
+```bash
+dvc exp apply <exp-name>     # Apply specific experiment
+dvc exp remove <exp-name>    # Remove specific experiment
+```
+
+---
+
+## ☁️ Add Remote Storage with AWS S3
+
+### Step 11: AWS Setup
+
+- Go to the [AWS IAM Console](https://console.aws.amazon.com/iam/)
+- Create a user with **programmatic access**.
+- Attach a policy (e.g., `AmazonS3FullAccess`)
+- Note down **Access Key** and **Secret Key**
+
+### Step 12: Configure AWS CLI
+
+```bash
+pip install awscli
+aws configure
+```
+
+Input your access/secret keys and region.
+
+### Step 13: Install DVC S3 Plugin
+
+```bash
+pip install "dvc[s3]"
+```
+
+### Step 14: Add S3 Remote for DVC
+
+```bash
+dvc remote add -d dvcstore s3://your-bucket-name
+dvc remote modify dvcstore endpointurl https://s3.amazonaws.com
+```
+
+### Step 15: Push Artifacts to Cloud
+
+```bash
+dvc push  # Push datasets/models tracked by DVC
+git add .dvc/config
+git commit -m "Add S3 remote"
+git push
+```
+
+---
 
 
-Adding a remote S3 storage to DVC:
-19) Login to AWS console
-20) Create an IAM user
-21) Create S3 (enter unique name and create)
-22) pip install "dvc[s3]"
-23) pip install awscli
-24) "aws configure" - on terminal
-25) dvc remote add -d dvcstore s3://bucketname (Instead of dvcstore, you could have added some other name as well)
-26) dvc commit-push the exp outcome that you want to keep
-27) Finally git add, commit, push
+## 🧾 Logging Crash Course
+
+Logging is a built-in Python module used to capture runtime information about your code, which helps with debugging, monitoring, and understanding what happened and when.
+
+- ✅ **Logger**: A central object that you'll use to log messages. You create one using `logging.getLogger(__name__)`.
+  
+- 🧱 **Handlers**: Decide *where* your logs will go:
+  - **StreamHandler**: Sends logs to the terminal/console.
+  - **FileHandler**: Saves logs to a file (like `pipeline.log`), useful for persistent tracking.
+
+- 🎨 **Formatters**: Define *how* your logs look:
+  - You can format logs to show time, log level, filename, message, etc.
+  - Example: `%(asctime)s - %(levelname)s - %(message)s` ➝ `2025-04-08 10:00:00 - INFO - Model training started`
+
+- 🚦 **Log Levels**: Specify the severity of the message:
+  - `DEBUG`: Detailed diagnostic information, useful for development.
+  - `INFO`: General runtime events (e.g., "model training started").
+  - `WARNING`: Something unexpected happened but the program can still run.
+  - `ERROR`: A serious problem; something failed.
+  - `CRITICAL`: A fatal error that will stop execution.
+
+- ⚙️ **Set Log Level**: You can control what gets printed/logged:
+  - If you set `logger.setLevel(logging.WARNING)`, only warnings and above will be shown.
+
+> 💡 Tip: Use logging instead of `print()` in production code. It’s more flexible, scalable, and professional.
+
+---
 
 
-Logging crash course:
-- logging is an inbuilt module
-- you make a logging object called a logger
-- you then define a handler for this logger. You also specify which sort of a handler you want: console handler to see the informations printed on the terminal or file handler which creates a file with the logs. 
-- then you also define a formatter. Formatter helps you define how you want the logs to be viewed in. For example: DD_TT_"message"_success is lets say one format. Its basically a sort of string formatting.
-- Once you define the handler and the formatter you add it in the logger object. 
-- logging levels:
-debug, info, warning, error, critical 
-- logger level when set, lets say you set it at error level, then you can log only errors and critical problems only. so you wont be able to see least sensitive problems
+## 📄 YAML Crash Course
 
-YAML Crash Course:
-- Its sort of like a dict, but is even easier to read. It uses Key-Value pairs. 
-- Has an indentation of 2 spaces. The hierarchy is done through indentation.
-- YAML is a superset of JSON
-- There are stages in our pipeline, like "data_ingestion", "preprocessing", "feature_engineering", "model_training", "model_evaluation". These will be added stagewise into the yaml file
-- Every stage will have the command to run it, the dependencies, might have parameters, and the output file location
-- 
+YAML (YAML Ain’t Markup Language) is a simple and human-readable way to store structured data. It's used extensively for configurations (e.g., `params.yaml`, `dvc.yaml`).
+
+- 📘 **Syntax**:
+  - Based on **key-value pairs**.
+  - Hierarchies are defined using **indentation** (2 spaces recommended).
+  - Comments start with `#`.
+
+- ✨ **Key Features**:
+  - Easier to read and write than JSON.
+  - Supports strings, integers, lists, and nested dictionaries.
+  - No commas or braces required.
+
+- 📁 **Used in DVC**:
+  - `params.yaml` holds hyperparameters and configuration settings that can be used across different scripts.
+  - `dvc.yaml` defines pipeline stages, commands, dependencies, and outputs for automation and reproducibility.
+
+- 🔍 **Example**:
+  ```yaml
+  train:
+    test_size: 0.2
+    random_state: 42
+  model:
+    max_depth: 5
+    learning_rate: 0.01
+  ```
+
+- 🔄 **Used in Code**:
+  - You can load YAML data in Python using `yaml.safe_load()` and use it just like a Python dictionary.
+
+> 💡 Tip: YAML is more readable than JSON, but remember — **indentation matters!** Always use consistent spacing.
+
+
+---
+
+## ✅ Summary of Commands
+
+```bash
+git init
+dvc init
+dvc repro
+dvc dag
+dvc exp run
+dvc exp show
+dvc push
+aws configure
+```
+
+---
+
+
