@@ -4,7 +4,7 @@ This project is a structured MLOps pipeline template that integrates **Git**, **
 
 ---
 
-## 🧱 Project Structure & Setup
+## Project Structure & Setup
 
 ### Step 1: Initialize Git Repository
 
@@ -36,7 +36,7 @@ git push origin main
 
 ---
 
-## 📦 Set up DVC for pipeline automation
+## Set up DVC for pipeline automation
 
 ### Step 2: Initialize DVC
 
@@ -80,7 +80,7 @@ git push
 
 ---
 
-## 📌 Parameterize the Pipeline with `params.yaml`
+## Parameterize the Pipeline with `params.yaml`
 
 To control parameters dynamically (e.g., train-test split, model hyperparameters):
 
@@ -136,7 +136,7 @@ git push
 
 ---
 
-## 📊 Run and Track Experiments with DVCLive
+## Run and Track Experiments with DVCLive
 
 ### Step 8: Install DVCLive
 
@@ -176,7 +176,7 @@ dvc exp remove <exp-name>    # Remove specific experiment
 
 ---
 
-## ☁️ Add Remote Storage with AWS S3
+## Add Remote Storage with AWS S3
 
 ### Step 11: AWS Setup
 
@@ -219,54 +219,54 @@ git push
 ---
 
 
-## 🧾 Logging Crash Course
+## Logging Crash Course
 
 Logging is a built-in Python module used to capture runtime information about your code, which helps with debugging, monitoring, and understanding what happened and when.
 
-- ✅ **Logger**: A central object that you'll use to log messages. You create one using `logging.getLogger(__name__)`.
+- **Logger**: A central object that you'll use to log messages. You create one using `logging.getLogger(__name__)`.
   
-- 🧱 **Handlers**: Decide *where* your logs will go:
+- **Handlers**: Decide *where* your logs will go:
   - **StreamHandler**: Sends logs to the terminal/console.
   - **FileHandler**: Saves logs to a file (like `pipeline.log`), useful for persistent tracking.
 
-- 🎨 **Formatters**: Define *how* your logs look:
+- **Formatters**: Define *how* your logs look:
   - You can format logs to show time, log level, filename, message, etc.
   - Example: `%(asctime)s - %(levelname)s - %(message)s` ➝ `2025-04-08 10:00:00 - INFO - Model training started`
 
-- 🚦 **Log Levels**: Specify the severity of the message:
+- **Log Levels**: Specify the severity of the message:
   - `DEBUG`: Detailed diagnostic information, useful for development.
   - `INFO`: General runtime events (e.g., "model training started").
   - `WARNING`: Something unexpected happened but the program can still run.
   - `ERROR`: A serious problem; something failed.
   - `CRITICAL`: A fatal error that will stop execution.
 
-- ⚙️ **Set Log Level**: You can control what gets printed/logged:
+- **Set Log Level**: You can control what gets printed/logged:
   - If you set `logger.setLevel(logging.WARNING)`, only warnings and above will be shown.
 
-> 💡 Tip: Use logging instead of `print()` in production code. It’s more flexible, scalable, and professional.
+> Use logging instead of `print()` in production code. It’s more flexible, scalable, and professional.
 
 ---
 
 
-## 📄 YAML Crash Course
+## YAML Crash Course
 
 YAML (YAML Ain’t Markup Language) is a simple and human-readable way to store structured data. It's used extensively for configurations (e.g., `params.yaml`, `dvc.yaml`).
 
-- 📘 **Syntax**:
+- **Syntax**:
   - Based on **key-value pairs**.
   - Hierarchies are defined using **indentation** (2 spaces recommended).
   - Comments start with `#`.
 
-- ✨ **Key Features**:
+- **Key Features**:
   - Easier to read and write than JSON.
   - Supports strings, integers, lists, and nested dictionaries.
   - No commas or braces required.
 
-- 📁 **Used in DVC**:
+- **Used in DVC**:
   - `params.yaml` holds hyperparameters and configuration settings that can be used across different scripts.
   - `dvc.yaml` defines pipeline stages, commands, dependencies, and outputs for automation and reproducibility.
 
-- 🔍 **Example**:
+- **Example**:
   ```yaml
   train:
     test_size: 0.2
@@ -276,15 +276,15 @@ YAML (YAML Ain’t Markup Language) is a simple and human-readable way to store 
     learning_rate: 0.01
   ```
 
-- 🔄 **Used in Code**:
+- **Used in Code**:
   - You can load YAML data in Python using `yaml.safe_load()` and use it just like a Python dictionary.
 
-> 💡 Tip: YAML is more readable than JSON, but remember — **indentation matters!** Always use consistent spacing.
+> YAML is more readable than JSON, but remember — **indentation matters!** Always use consistent spacing.
 
 
 ---
 
-## ✅ Summary of Commands
+## Summary of Commands
 
 ```bash
 git init
