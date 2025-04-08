@@ -1,4 +1,4 @@
-# 🧪 MLOps Pipeline using DVC & Git
+# MLOps Pipeline using DVC & Git
 
 This project is a structured MLOps pipeline template that integrates **Git**, **DVC**, **AWS S3**, **experimentation tracking**, and **parameterization**. The goal is to modularize ML workflows, track experiments, version datasets/models, and enable reproducibility and collaboration.
 
